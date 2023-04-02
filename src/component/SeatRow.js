@@ -1,6 +1,9 @@
 import React, { Component } from "react";
+import { connect } from "react-redux";
+// import { reserveSeat } from "../redux/actions/BookingActions";
+import { RESERVE_SEAT } from "../redux/types/BookingTypes";
 
-export default class SeatRow extends Component {
+class SeatRow extends Component {
   renderSeat = () => {
     return this.props.seatRow.seatList.map((seat, index) => {
       let cssBookedSeat = "";
@@ -9,13 +12,20 @@ export default class SeatRow extends Component {
         cssBookedSeat = "bookedSeat";
         disabled = true;
       }
+      let cssBookingSeat = "";
+      let bookingIndex = this.props.bookingList.findIndex(
+        (bookingSeat) => bookingSeat.seat === seat.seat
+      );
+      if (bookingIndex !== -1) {
+        cssBookingSeat = "bookingSeat";
+      }
       return (
         <button
           disabled={disabled}
-          className={`seat ${cssBookedSeat}`}
+          className={`seat ${cssBookedSeat} ${cssBookingSeat}`}
           key={index}
           onClick={() => {
-            alert(1);
+            this.props.reserveSeat(seat);
           }}
         >
           {seat.seat}
@@ -57,3 +67,22 @@ export default class SeatRow extends Component {
     );
   }
 }
+
+const mapStateToProps = (state) => {
+  return {
+    bookingList: state.BookingReducer.bookingList,
+  };
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    reserveSeat: (seat) => {
+      dispatch({
+        type: RESERVE_SEAT,
+        seat,
+      });
+    },
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(SeatRow);
